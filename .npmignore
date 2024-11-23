@@ -1,5 +1,5 @@
-# Build output
-dist
+# Test files
+test
 
 # Logs
 logs

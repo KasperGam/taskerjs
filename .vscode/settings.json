@@ -1,0 +1,15 @@
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[javascript]": { "editor.tabSize": 2 },
+  "[typescript]": {
+    "editor.tabSize": 2
+  },
+  "eslint.enable": false,
+  "cSpell.words": [
+    "Tasker"
+  ]
+}
