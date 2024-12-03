@@ -1,10 +1,13 @@
 {
     "name": "@optask/tasker",
-    "version": "1.0.0",
+    "version": "1.1.1",
     "description": "A task scheduler and runner for deployments, developed in nodejs",
     "author": "Kasper Gammeltoft",
     "license": "MIT",
     "private": false,
+    "scripts": {
+        "version": "yarn version --new-version $npm_package_version"
+    },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/KasperGam/taskerjs.git",
