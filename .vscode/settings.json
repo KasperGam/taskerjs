@@ -9,6 +9,6 @@
     "editor.tabSize": 2
   },
   "eslint.enable": false,
-  "cSpell.words": ["Tasker"],
+  "cSpell.words": ["optask", "Tasker"],
   "files.insertFinalNewline": true
 }
