@@ -16,5 +16,7 @@ export class TestTask extends BaseTask {
 
   reset() {
     this.taskWasRun = false;
+    this.state = `idle`;
+    this.skippedReason = undefined;
   }
 }

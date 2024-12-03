@@ -1,6 +1,13 @@
 import { DependencyResolver } from './resolver/dependency.resolver';
 import { SyncTaskRunnerProvider } from './runner/sync.taskRunnerProvider';
-import { SchedulerState, Task, TaskRunner, TaskRunnerProvider } from './types';
+import { InMemoryStore } from './store/memory.store';
+import {
+  SchedulerState,
+  Store,
+  Task,
+  TaskRunner,
+  TaskRunnerProvider,
+} from './types';
 
 /**
  * The scheduler for all tasks, this is the main class to register new tasks with and
@@ -21,9 +28,14 @@ export class TaskScheduler {
   // Hold onto scheduler state
   private state: SchedulerState = `planning`;
   private runner: TaskRunner | null = null;
+  private store: Store = new InMemoryStore();
 
   getState(): SchedulerState {
     return this.state;
+  }
+
+  getStore(): Store {
+    return this.store;
   }
 
   addCondition(name: string, condition: any) {
@@ -73,6 +85,15 @@ export class TaskScheduler {
   }
 
   /**
+   * Registers a new task store for use whenever persisted storage is needed to
+   * complete tasks or process if tasks should run
+   * @param store The store to set as the backing storage for task use
+   */
+  registerStore(store: Store) {
+    this.store = store;
+  }
+
+  /**
    * Will run test based on the condition state and the task's conditional to see if it should run
    * @param task The task to test the current condition states for
    * @returns True if the task should run given the current conditions, false otherwise
@@ -96,11 +117,23 @@ export class TaskScheduler {
    * @returns The list of tasks to run in sorted order from the dependency resolver.
    */
   private resolveTasksToRun() {
-    const sortedTasks = this.dependencyResolver
+    const orderedTasks = this.dependencyResolver
       .getTaskOrder()
-      .map((task) => this.taskRegistry.get(task))
-      .filter((task) => this.conditionsApplyTo(task));
+      .map((task) => this.taskRegistry.get(task));
 
+    orderedTasks.forEach((task) => {
+      if (!this.conditionsApplyTo(task)) {
+        task.state = `skipped`;
+        task.skippedReason = `Does not meet conditions`;
+      }
+      if (task.state !== `idle` && task.state !== `skipped`) {
+        throw new Error(
+          `Task in invalid state before running! ${task.name} in state ${task.state}`,
+        );
+      }
+    });
+
+    const sortedTasks = orderedTasks.filter((task) => task.state === `idle`);
     return sortedTasks;
   }
 
@@ -119,7 +152,11 @@ export class TaskScheduler {
     this.state = `running`;
 
     // start runner with tasks
-    const runner = this.taskRunnerProvider.getTaskRunner(toRun);
+    const runner = this.taskRunnerProvider.getTaskRunner(
+      toRun,
+      this.conditionState,
+      this.getStore(),
+    );
     runner.on(`done`, () => {
       console.log(`Done running ${toRun.length} task(s)`);
       this.state = `finished`;

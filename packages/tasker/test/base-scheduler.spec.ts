@@ -31,6 +31,12 @@ describe(`Task Scheduler`, () => {
     expect(taskD.taskWasRun).toEqual(true);
     expect(taskE.taskWasRun).toEqual(true);
 
+    expect(taskA.state).toEqual(`success`);
+    expect(taskB.state).toEqual(`success`);
+    expect(taskC.state).toEqual(`success`);
+    expect(taskD.state).toEqual(`success`);
+    expect(taskE.state).toEqual(`success`);
+
     expect(scheduler.getState()).toEqual(`finished`);
   });
 
