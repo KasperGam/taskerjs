@@ -1,4 +1,4 @@
-import { Modifier, ModifierArgs, Store, Task, TaskState } from '../types';
+import { Modifier, ModifierArgs, Task, TaskState } from '../types';
 
 type StoredTaskState = {
   name: string;
@@ -29,7 +29,7 @@ export class RunOnceModifier implements Modifier {
       const taskRan = parsed.status === successStatus;
 
       return !taskRan;
-    } catch (e) {
+    } catch {
       console.error(
         `Error thrown when trying to fetch task state!\nkey: ${key}\ntask: ${task.name}\nstate: ${conditionState}`,
       );

@@ -1,4 +1,4 @@
-import { ModifierArgs, Task } from '../types';
+import { ModifierArgs } from '../types';
 
 export const shouldRunTask = async (args: ModifierArgs): Promise<boolean> => {
   const modifierPromises = args.task.modifiers
