@@ -1,23 +1,24 @@
 {
-    "name": "@optask/tasker",
-    "version": "1.1.1",
-    "description": "A task scheduler and runner for deployments, developed in nodejs",
-    "author": "Kasper Gammeltoft",
-    "license": "MIT",
-    "private": false,
-    "scripts": {
-        "version": "yarn version --new-version $npm_package_version"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/KasperGam/taskerjs.git",
-        "directory": "tasker/"
-    },
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
-    "files": [
-        "dist",
-        "src"
-    ],
-    "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "name": "@optask/tasker",
+  "version": "1.0.0",
+  "description": "A task scheduler and runner for deployments, developed in nodejs",
+  "author": "Kasper Gammeltoft",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "version": "yarn version --new-version $npm_package_version",
+    "publish": "yarn publish"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KasperGam/taskerjs.git",
+    "directory": "tasker/"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

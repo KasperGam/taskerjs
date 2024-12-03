@@ -24,6 +24,6 @@ jobs:
       - name: Run Tests
         run: yarn test
       - name: Publish
-        run: yarn publish
+        run: yarn workspaces run publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}

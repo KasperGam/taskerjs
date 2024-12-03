@@ -1,13 +1,13 @@
 {
-  "files": [],
-  "include": [],
   "compilerOptions": {
     "module": "commonjs",
     "target": "es2019",
     "types": ["node", "jest"],
     "declaration": true,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "rootDir": "./",
+    "outDir": "./dist"
   },
-  "references": [{ "path": "./packages/tasker/tsconfig.json" }]
+  "include": ["./src/**/*", "./test/**/*", "./index.ts"]
 }

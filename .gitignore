@@ -1,6 +1,10 @@
 # Build output
 dist
 
+# Local FS
+.DS_Store
+**/.DS_Store
+
 # Logs
 logs
 *.log

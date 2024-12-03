@@ -1,4 +1,5 @@
 {
-  "extends": "./tsconfig",
-  "exclude": ["**/*.(test|spec).*", "**/test/*"]
+  "files": [],
+  "include": [],
+  "references": [{ "path": "./packages/tasker/tsconfig.build.json" }]
 }
