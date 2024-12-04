@@ -9,6 +9,6 @@
     "editor.tabSize": 2
   },
   "eslint.enable": false,
-  "cSpell.words": ["optask", "Tasker"],
+  "cSpell.words": ["golevelup", "nestjs", "optask", "Tasker"],
   "files.insertFinalNewline": true
 }

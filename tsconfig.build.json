@@ -1,5 +1,8 @@
 {
   "files": [],
   "include": [],
-  "references": [{ "path": "./packages/tasker/tsconfig.build.json" }]
+  "references": [
+    { "path": "./packages/tasker/tsconfig.build.json" },
+    { "path": "./packages/nestjs/tsconfig.build.json" }
+  ]
 }
