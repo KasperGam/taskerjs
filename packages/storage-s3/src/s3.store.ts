@@ -38,7 +38,7 @@ export class S3Store implements Store {
     const getObject = new HeadObjectCommand(input);
 
     try {
-      const data = await client.send(getObject);
+      await client.send(getObject);
       return true;
     } catch {
       return false;
@@ -100,7 +100,7 @@ export class S3Store implements Store {
         Bucket: bucket,
       };
       const command = new HeadBucketCommand(input);
-      const data = await client.send(command);
+      await client.send(command);
       return true;
     } catch {
       try {
