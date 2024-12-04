@@ -6,6 +6,27 @@ import {
 } from '@optask/tasker';
 import { TaskMetaKey } from './constants';
 
+/**
+ * A base class that all tasks should extend. You should
+ * annotate your task with "@Task" and extend this base class
+ * in order to register tasks to run on the tasker scheduler.
+ *
+ * An example usage would look like this:
+ *
+ * @example
+ * ```
+ * import { Task, BaseTask } from '@optask/nestjs';
+ *
+ * @Task({name: "My Task"})
+ * export class MyTask extends BaseTask {
+ *
+ *   run() {
+ *     console.log("Hello world!");
+ *   }
+ *
+ * }
+ * ```
+ */
 export abstract class BaseTask extends TaskerBaseTask {
   name: string;
   condition: Condition<any, any>;
@@ -17,7 +38,10 @@ export abstract class BaseTask extends TaskerBaseTask {
 
   constructor() {
     super({ name: `BaseTask` });
-    const taskMetadata = Reflect.getMetadata(TaskMetaKey, this) as TaskMetadata;
+    const taskMetadata = Reflect.getMetadata(
+      TaskMetaKey,
+      this.constructor,
+    ) as TaskMetadata;
     if (!taskMetadata) {
       throw new Error(`Must be decorated with the @Task decorator!`);
     }

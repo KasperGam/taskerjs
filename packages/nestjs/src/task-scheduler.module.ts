@@ -16,11 +16,29 @@ import { DiscoveryModule } from '@golevelup/nestjs-discovery';
 
 export type TaskSchedulerModuleOptions = {
   imports?: ModuleMetadata[`imports`];
+  global?: boolean;
   store: Store;
   conditions?: Record<string, any>;
   conditionsProvider?: InjectionToken<ConditionsProvider>;
 };
 
+/**
+ * The main module to interface with Tasker in NextJS.
+ * Use this module and register the tasks you want to run
+ * in a separate module/modules that you pass into this
+ * module's imports.
+ *
+ * Also provide a store, and optionally conditions/a conditions
+ * provider.
+ *
+ * If both conditions and a conditions provider are given,
+ * both will be used.
+ * The conditions provider will override any conditions that
+ * exist in both.
+ *
+ * Note this module is not global by default. You can pass
+ * in a global option if you need it to be.
+ */
 @Module({})
 export class TaskSchedulerModule {
   static register(options: TaskSchedulerModuleOptions) {
@@ -54,6 +72,7 @@ export class TaskSchedulerModule {
         TaskSchedulerService,
       ],
       exports: [TaskSchedulerService],
+      global: options.global,
     };
 
     return dynamicModule;
