@@ -13,6 +13,7 @@
   },
   "references": [
     { "path": "./packages/tasker/tsconfig.json" },
-    { "path": "./packages/nestjs/tsconfig.json" }
+    { "path": "./packages/nestjs/tsconfig.json" },
+    { "path": "./packages/storage-s3/tsconfig.json" }
   ]
 }

@@ -3,6 +3,7 @@
   "include": [],
   "references": [
     { "path": "./packages/tasker/tsconfig.build.json" },
-    { "path": "./packages/nestjs/tsconfig.build.json" }
+    { "path": "./packages/nestjs/tsconfig.build.json" },
+    { "path": "./packages/storage-s3/tsconfig.build.json" }
   ]
 }
