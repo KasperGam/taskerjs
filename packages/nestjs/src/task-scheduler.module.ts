@@ -4,7 +4,7 @@ import {
   Module,
   ModuleMetadata,
 } from '@nestjs/common';
-import { Store } from '@optask/tasker';
+import { InMemoryStore, Store } from '@optask/tasker';
 import {
   Conditions,
   ConditionsProvider,
@@ -17,7 +17,8 @@ import { DiscoveryModule } from '@golevelup/nestjs-discovery';
 export type TaskSchedulerModuleOptions = {
   imports?: ModuleMetadata[`imports`];
   global?: boolean;
-  store: Store;
+  store?: Store;
+  storeProvider?: InjectionToken<Store>;
   conditions?: Record<string, any>;
   conditionsProvider?: InjectionToken<ConditionsProvider>;
 };
@@ -29,7 +30,9 @@ export type TaskSchedulerModuleOptions = {
  * module's imports.
  *
  * Also provide a store, and optionally conditions/a conditions
- * provider.
+ * provider. You can provide a store by directly passing a
+ * store instance, or set the storeProvider with the injected
+ * token of a provider that implements the store interface.
  *
  * If both conditions and a conditions provider are given,
  * both will be used.
@@ -42,6 +45,21 @@ export type TaskSchedulerModuleOptions = {
 @Module({})
 export class TaskSchedulerModule {
   static register(options: TaskSchedulerModuleOptions) {
+    const storeProvider = options.store
+      ? {
+          provide: StoreProvider,
+          useValue: options.store,
+        }
+      : options.storeProvider
+        ? {
+            provide: StoreProvider,
+            useExisting: options.storeProvider,
+          }
+        : {
+            provide: StoreProvider,
+            useValue: new InMemoryStore(),
+          };
+
     const dynamicModule: DynamicModule = {
       imports: options.imports
         ? [...options.imports, DiscoveryModule]
@@ -65,13 +83,10 @@ export class TaskSchedulerModule {
             ? [options.conditionsProvider]
             : undefined,
         },
-        {
-          provide: StoreProvider,
-          useValue: options.store,
-        },
+        storeProvider,
         TaskSchedulerService,
       ],
-      exports: [TaskSchedulerService],
+      exports: [TaskSchedulerService, StoreProvider],
       global: options.global,
     };
 
