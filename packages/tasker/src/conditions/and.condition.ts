@@ -6,9 +6,9 @@ export class ANDCondition<T extends unknown[], C extends Condition<T[number]>[]>
   value: C;
   name: string;
 
-  constructor(_name: string, _value: C) {
+  constructor(_value: C) {
     this.value = _value;
-    this.name = _name;
+    this.name = `AND_${this.getSubConditions().join(`_`)}`;
   }
 
   comparison(conditions: T) {

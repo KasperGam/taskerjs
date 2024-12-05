@@ -135,17 +135,11 @@ describe(`Task Scheduler`, () => {
     });
     const taskD = new TestTask({
       name: `d`,
-      condition: new ANDCondition(`versionAndDate`, [
-        deployDateCondition,
-        versionCondition,
-      ]),
+      condition: new ANDCondition([deployDateCondition, versionCondition]),
     });
     const taskE = new TestTask({
       name: `e`,
-      condition: new ORCondition(`dateOrDeploys`, [
-        deployDateCondition,
-        numDeploysCondition,
-      ]),
+      condition: new ORCondition([deployDateCondition, numDeploysCondition]),
     });
     scheduler.registerTask(taskA);
     scheduler.registerTask(taskB);

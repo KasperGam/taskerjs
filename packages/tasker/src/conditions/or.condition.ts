@@ -6,9 +6,9 @@ export class ORCondition<V extends unknown[], C extends Condition<V[number]>[]>
   value: C;
   name: string;
 
-  constructor(_name: string, _value: C) {
+  constructor(_value: C) {
     this.value = _value;
-    this.name = _name;
+    this.name = `OR_${this.getSubConditions().join(`_`)}`;
   }
 
   comparison(conditions: V) {

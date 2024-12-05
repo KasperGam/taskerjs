@@ -6,9 +6,9 @@ export class NOTCondition<V, C extends Condition<V>>
   value: C;
   name: string;
 
-  constructor(_name: string, _value: C) {
+  constructor(_value: C) {
     this.value = _value;
-    this.name = _name;
+    this.name = `NOT_${this.getSubConditions().join(`_`)}`;
   }
 
   comparison(condition: V) {
