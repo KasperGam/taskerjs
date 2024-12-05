@@ -48,6 +48,11 @@ export class TaskScheduler {
     return this;
   }
 
+  setShouldLookupConditionsInStore(should: boolean) {
+    this.shouldLookupConditionsInStore = should;
+    return this;
+  }
+
   /**
    * Registers a task with the scheduler
    * Throws an error if the task is already registered (name duplication). Task names must be unique.
