@@ -35,7 +35,9 @@ export class ANDCondition<T extends unknown[], C extends Condition<T[number]>[]>
       } else if (condition.compareFromState) {
         passesCondition = condition.compareFromState(state);
       } else {
-        passesCondition = false;
+        throw new Error(
+          `Unable to determine how to test sub condition ${condition.name} of ${this.name}. Was a condition not set?`,
+        );
       }
 
       if (!passesCondition) {
@@ -43,5 +45,15 @@ export class ANDCondition<T extends unknown[], C extends Condition<T[number]>[]>
       }
     }
     return true;
+  }
+
+  getSubConditions() {
+    const subConditions: string[] = [];
+    for (const condition of this.value) {
+      const toAdd = condition.getSubConditions?.() ?? [condition.name];
+      subConditions.push(...toAdd);
+    }
+
+    return subConditions;
   }
 }

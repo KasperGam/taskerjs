@@ -30,6 +30,8 @@ export class TaskScheduler {
   private runner: TaskRunner | null = null;
   private store: Store = new InMemoryStore();
 
+  public shouldLookupConditionsInStore: boolean = false;
+
   getState(): SchedulerState {
     return this.state;
   }
@@ -93,6 +95,24 @@ export class TaskScheduler {
     this.store = store;
   }
 
+  async lookupMissingConditionsInStore(tasks: Task[]) {
+    if (!this.shouldLookupConditionsInStore) {
+      return;
+    }
+
+    for (const task of tasks) {
+      const conditionNames = task.condition.getSubConditions?.() ?? [
+        task.condition.name,
+      ];
+      for (const name of conditionNames) {
+        if (!this.conditionState.has(name) && this.store.has(name)) {
+          const conditionState = await this.store.get(name);
+          this.addCondition(name, conditionState);
+        }
+      }
+    }
+  }
+
   /**
    * Will run test based on the condition state and the task's conditional to see if it should run
    * @param task The task to test the current condition states for
@@ -116,10 +136,12 @@ export class TaskScheduler {
    * to filter out tasks that don't meet the current conditions to run.
    * @returns The list of tasks to run in sorted order from the dependency resolver.
    */
-  private resolveTasksToRun() {
+  private async resolveTasksToRun() {
     const orderedTasks = this.dependencyResolver
       .getTaskOrder()
       .map((task) => this.taskRegistry.get(task));
+
+    await this.lookupMissingConditionsInStore(orderedTasks);
 
     orderedTasks.forEach((task) => {
       if (!this.conditionsApplyTo(task)) {
@@ -144,7 +166,7 @@ export class TaskScheduler {
     if (this.state !== `planning`) {
       throw new Error(`Cannot run tasks in already running state!`);
     }
-    const toRun = this.resolveTasksToRun();
+    const toRun = await this.resolveTasksToRun();
 
     console.log(
       `Running tasks, found ordering: ${JSON.stringify(toRun.map((run) => run.name))}`,
