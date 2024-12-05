@@ -24,7 +24,7 @@ export class SyncTaskRunner
     super();
   }
 
-  async start(args: any[]) {
+  async start(args: string[]) {
     for (const task of this.tasks) {
       const modifierArgs = {
         task,

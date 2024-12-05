@@ -1,8 +1,6 @@
 # Tasker
 
-Tasker is a simple task runner designed to be useful when running deployment jobs. If you need to only run tasks under certain conditions, or only run a task once, you can hook up those conditions to the tasks you are running and schedule them to run on deployment, then watch as only the things you specified run.
-
-An easy example would be db migrations that you want to run when you release a certain version, say 1.2.0, of your backend. You can setup a task that will only ever run once on the condition of the version being deployed matches 1.2.0.
+A general and powerful tool to run tasks written in nodejs.
 
 ## Quickstart
 
@@ -23,7 +21,7 @@ export class MigrateTask extends BaseTask {
         });
     }
 
-    override async run(args: any[]) {
+    override async run(args: string[]) {
         const db = someDBConnection(args);
         await db.migrate();
     }
@@ -47,3 +45,13 @@ scheduler.addCondition(`version`, process.env.VERSION);
 // Finally run the tasks with the scheduler
 await scheduler.run();
 ```
+
+## Packages
+
+There are several packages in this repo depending on your use case, but all extend from the base package [@optask/tasker](./packages/tasker).
+
+- Tasker: [@optask/tasker](./packages/tasker/README.md). Base package.
+- NestJS: [@optask/nestjs](./packages/nestjs/README.md). A wrapper for nestjs apps.
+- S3 Storage: [@optask/storage-s3](./packages/storage-s3/README.md). A store implementation using s3.
+
+There is more information in the readmes for those packages.

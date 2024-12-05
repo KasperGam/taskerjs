@@ -39,7 +39,7 @@ export interface Task {
    * A function to run this task. Can be async.
    * @param args Whatever arguments happen to be passed to the tasks
    */
-  run: (args: any[]) => void | Promise<void>;
+  run: (args: string[]) => void | Promise<void>;
 }
 
 export type ConditionComparison<C> = (condition: C) => boolean;
@@ -94,7 +94,7 @@ export type TaskRunnerEventMap = {
  * A class that can run tasks and report back the progress being made for each task
  */
 export interface TaskRunner extends EventEmitter<TaskRunnerEventMap> {
-  start: (args: any[]) => void | Promise<void>;
+  start: (args: string[]) => void | Promise<void>;
   getRunningTasks: () => Task[];
   getCompletedTasks: () => Task[];
 }

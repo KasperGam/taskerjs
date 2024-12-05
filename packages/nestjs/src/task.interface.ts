@@ -34,7 +34,7 @@ export abstract class BaseTask extends TaskerBaseTask {
   state: TaskState;
   modifiers: Modifier[];
   skippedReason?: string;
-  abstract run(args: any[]): void;
+  abstract run(args: string[]): void;
 
   constructor() {
     super({ name: `BaseTask` });
