@@ -24,9 +24,5 @@ export abstract class BaseTask implements Task {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  run(args: string[]) {
-    throw new Error(
-      `Unimplemented task ${this.name}. Did you forget to subclass BaseTask and implement run?`,
-    );
-  }
+  run(args: string[]) {}
 }
