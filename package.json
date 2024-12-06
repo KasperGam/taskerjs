@@ -9,7 +9,8 @@
     "build": "yarn lint && yarn build-tsc",
     "lint": "yarn eslint . && yarn prettier . --check",
     "format": "yarn prettier . --write --ignore-unknown",
-    "test": "yarn jest"
+    "test": "yarn jest",
+    "set-version": "yarn workspaces run set-version $npm_version && yarn version $npm_version"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",

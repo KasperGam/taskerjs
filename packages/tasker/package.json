@@ -1,13 +1,13 @@
 {
   "name": "@optask/tasker",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A task scheduler and runner for deployments, developed in nodejs",
   "author": "Kasper Gammeltoft",
   "license": "MIT",
   "private": false,
   "scripts": {
-    "version": "yarn version --new-version $npm_package_version",
-    "publish": "yarn publish"
+    "set-version": "yarn version --new-version",
+    "publish-to-npm": "yarn publish --access public"
   },
   "repository": {
     "type": "git",
