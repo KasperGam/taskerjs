@@ -53,5 +53,6 @@ There are several packages in this repo depending on your use case, but all exte
 - Tasker: [@optask/tasker](./packages/tasker/README.md). Base package.
 - NestJS: [@optask/nestjs](./packages/nestjs/README.md). A wrapper for nestjs apps.
 - S3 Storage: [@optask/storage-s3](./packages/storage-s3/README.md). A store implementation using s3.
+- Redis Storage: [@optask/storage-redis](./packages/storage-redis/README.md). A store implementation using redis.
 
 There is more information in the readmes for those packages.
