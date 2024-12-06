@@ -34,7 +34,6 @@ describe(`S3 Store`, () => {
 
   it(`S3 store can set and get data`, async () => {
     const endpoint = `http://${s3Host}:${s3Port}`;
-    console.log(`Using endpoint ${endpoint}`);
     const store = new S3Store({
       credentials: {
         accessKeyId: `root_user`,
