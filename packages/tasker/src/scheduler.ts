@@ -89,6 +89,7 @@ export class TaskScheduler {
    */
   registerTaskRunnerProvider(provider: TaskRunnerProvider) {
     this.taskRunnerProvider = provider;
+    return this;
   }
 
   /**
@@ -98,6 +99,7 @@ export class TaskScheduler {
    */
   registerStore(store: Store) {
     this.store = store;
+    return this;
   }
 
   async lookupMissingConditionsInStore(tasks: Task[]) {
