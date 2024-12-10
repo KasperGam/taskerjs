@@ -109,7 +109,7 @@ export class ParallelTaskRunner
       let allDepsDone = true;
       for (const dep of dependencies) {
         if (dep.state === `error`) {
-          task.state === `error`;
+          task.state = `error`;
           allDepsDone = false;
           break;
         } else if (dep.state === `idle` || dep.state === `running`) {
