@@ -194,6 +194,9 @@ export class TaskScheduler {
       console.error(`Scheduler failed, error thrown when running tasks!`);
       this.state = `error`;
     });
+    runner.on(`taskComplete`, (task) => {
+      console.log(`Task ${task.name} complete with status ${task.state}`);
+    });
     this.runner = runner;
     await runner.start(process.argv);
   }

@@ -48,6 +48,7 @@ export class SyncTaskRunner
         task.state = `success`;
         await notifyDidRunTask(modifierArgs);
         this.completedTasks.push(task);
+        this.emit(`taskComplete`, task);
       } catch (e) {
         console.error(`Error occurred running task ${task.name}: ${e.message}`);
         task.state = `error`;

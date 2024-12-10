@@ -170,6 +170,7 @@ export type SchedulerState = `planning` | `running` | `error` | `finished`;
 export type TaskRunnerEventMap = {
   error: Error[];
   done: Task[][];
+  taskComplete: Task[];
 };
 
 /**
