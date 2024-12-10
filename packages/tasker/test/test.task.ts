@@ -2,7 +2,7 @@ import { BaseTask, BaseTaskArgs } from '../src/tasks/base.task';
 
 export class TestTask extends BaseTask {
   taskWasRun: boolean = false;
-  toRun?: () => void;
+  toRun?: () => void | Promise<void>;
 
   constructor(args: BaseTaskArgs & { run?: () => void }) {
     super(args);
@@ -10,7 +10,7 @@ export class TestTask extends BaseTask {
   }
 
   override async run() {
-    this.toRun?.();
+    await this.toRun?.();
     this.taskWasRun = true;
   }
 

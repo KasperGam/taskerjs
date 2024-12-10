@@ -19,6 +19,7 @@
     "@nestjs/platform-express": "^10.4.13",
     "@nestjs/testing": "^10.4.13",
     "@testcontainers/redis": "^10.16.0",
+    "@types/async-lock": "^1.4.2",
     "@types/eslint__js": "^8.42.3",
     "@types/inquirer": "^9.0.7",
     "@types/jest": "^29.5.14",
