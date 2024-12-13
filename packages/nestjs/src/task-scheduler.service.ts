@@ -1,10 +1,11 @@
 import { DiscoveryService } from '@golevelup/nestjs-discovery';
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Store, TaskScheduler } from '@optask/tasker';
 import { TaskMetaKey } from './constants';
 import { BaseTask, TaskMetadata } from './task.interface';
 import { Store as StoreToken } from './store.provider';
 import { Conditions, ProvidedConditions } from './conditions.provider';
+import { NestLogger } from './nestjs.logger';
 
 @Injectable()
 export class TaskSchedulerService
@@ -17,6 +18,8 @@ export class TaskSchedulerService
     private readonly discoveryService: DiscoveryService,
   ) {
     super();
+
+    this.setLogger(new NestLogger(TaskScheduler.name));
     this.registerStore(store);
     for (const condition of conditions.keys()) {
       this.addCondition(condition, conditions.get(condition));
