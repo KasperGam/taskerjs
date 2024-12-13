@@ -1,4 +1,5 @@
-import { Modifier, ModifierArgs, Task, TaskState } from '../types';
+import { ConsoleLogger } from '../logger/console.logger';
+import { Logger, Modifier, ModifierArgs, Task, TaskState } from '../types';
 
 type StoredTaskState = {
   name: string;
@@ -8,6 +9,7 @@ type StoredTaskState = {
 };
 
 export class RunOnceModifier implements Modifier {
+  logger: Logger = new ConsoleLogger();
   constructor(private readonly conditions?: string[]) {}
 
   async shouldTaskRun({
@@ -20,6 +22,9 @@ export class RunOnceModifier implements Modifier {
     const taskState = await store.get(key);
 
     if (!taskState) {
+      this.logger.debug(
+        `No prior task state found for ${task.name} in store. Not blocking task from being run.`,
+      );
       return true;
     }
     try {
@@ -27,10 +32,12 @@ export class RunOnceModifier implements Modifier {
 
       const successStatus: TaskState = `success`;
       const taskRan = parsed.status === successStatus;
-
+      this.logger.debug(
+        `Task state found for ${task.name} in store. Will ${taskRan ? 'block' : 'not block'} task from running due to status being ${parsed.status}`,
+      );
       return !taskRan;
     } catch {
-      console.error(
+      this.logger.error(
         `Error thrown when trying to fetch task state!\nkey: ${key}\ntask: ${task.name}\nstate: ${conditionState}`,
       );
       return false;
@@ -39,9 +46,11 @@ export class RunOnceModifier implements Modifier {
 
   async taskDidRun({ conditionState, task, store }: ModifierArgs) {
     const key = this.getTaskKey(conditionState, task.name);
-    const state = this.getTaskState(task, conditionState);
-
-    await store.set(key, JSON.stringify(state));
+    const state = JSON.stringify(this.getTaskState(task, conditionState));
+    this.logger.debug(
+      `Setting task ${task.name} run state in the store: ${state}`,
+    );
+    await store.set(key, state);
   }
 
   private getTaskKey(state: Map<string, any>, name: string) {

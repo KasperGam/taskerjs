@@ -1,4 +1,4 @@
-import { Store } from '@optask/tasker';
+import { Store, Logger, ConsoleLogger } from '@optask/tasker';
 import path from 'path';
 import {
   CreateBucketCommand,
@@ -22,11 +22,16 @@ export interface S3StoreOptions extends S3ClientConfig {
 
 export class S3Store implements Store {
   private client: S3Client;
-  constructor(private readonly options: S3StoreOptions) {}
+  logger: Logger = new ConsoleLogger();
+  constructor(private readonly options: S3StoreOptions) {
+    this.logger.debug(`Creating s3 store with options:`, options);
+  }
 
   async has(key: string): Promise<boolean> {
+    this.logger.trace(`Checking object exists in s3 store ${key}`);
     const ensure = await this.ensureBucket();
     if (!ensure) {
+      this.logger.error(`Failed to check bucket exists!`);
       throw new Error(`Failed to check bucket exists!`);
     }
     const client = this.getClient();
@@ -39,6 +44,9 @@ export class S3Store implements Store {
 
     try {
       await client.send(getObject);
+      this.logger.trace(
+        `Found object in s3 store ${key}, full path ${input.Key}`,
+      );
       return true;
     } catch {
       return false;
@@ -46,8 +54,10 @@ export class S3Store implements Store {
   }
 
   async get(key: string): Promise<string | null> {
+    this.logger.trace(`Fetching object in s3 store ${key}`);
     const ensure = await this.ensureBucket();
     if (!ensure) {
+      this.logger.error(`Failed to check bucket exists!`);
       throw new Error(`Failed to check bucket exists!`);
     }
     const client = this.getClient();
@@ -60,6 +70,9 @@ export class S3Store implements Store {
 
     try {
       const data = await client.send(getObject);
+      this.logger.trace(
+        `Found object in s3 store ${key}, full path ${input.Key}`,
+      );
       return data.Body.transformToString(`utf-8`);
     } catch {
       return null;
@@ -67,8 +80,10 @@ export class S3Store implements Store {
   }
 
   async set(key: string, data: string) {
+    this.logger.trace(`Setting ${key} in s3 store to ${data}`);
     const ensure = await this.ensureBucket();
     if (!ensure) {
+      this.logger.error(`Failed to check bucket exists!`);
       throw new Error(`Failed to check bucket exists!`);
     }
 
@@ -82,6 +97,9 @@ export class S3Store implements Store {
     const putObject = new PutObjectCommand(input);
 
     await client.send(putObject);
+    this.logger.debug(
+      `Successfully set ${key} in s3 store to ${data}. Full path ${input.Key}`,
+    );
   }
 
   getClient() {
@@ -111,7 +129,7 @@ export class S3Store implements Store {
         await client.send(command);
         return true;
       } catch (e) {
-        console.error(
+        this.logger.error(
           `Error creating bucket ${bucket}! ${e instanceof Error ? e.message : e}`,
         );
         return false;

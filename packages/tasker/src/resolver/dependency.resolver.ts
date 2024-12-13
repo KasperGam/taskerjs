@@ -1,4 +1,9 @@
+import { ConsoleLogger } from '../logger/console.logger';
+import { Logger } from '../types';
+
 export class DependencyResolver {
+  logger: Logger = new ConsoleLogger();
+
   private readonly tree: Map<string, Set<string>> = new Map();
 
   /**
@@ -124,10 +129,16 @@ export class DependencyResolver {
     }
 
     if (result.length !== this.tree.size) {
-      throw new Error(
+      const resolverError = new Error(
         `Dependent tree has a cycle! Please find and fix the cycle first!`,
       );
+      this.logger.fatal(resolverError.message, resolverError);
+      throw resolverError;
     }
+
+    this.logger.trace(
+      `Resolved dependencies and sorted successfully. Order:\n${JSON.stringify(result, undefined, 2)}`,
+    );
 
     return result;
   }

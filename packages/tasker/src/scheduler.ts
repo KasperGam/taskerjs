@@ -1,7 +1,9 @@
+import { ConsoleLogger } from './logger/console.logger';
 import { DependencyResolver } from './resolver/dependency.resolver';
 import { SyncTaskRunnerProvider } from './runner/sync.taskRunnerProvider';
 import { InMemoryStore } from './store/memory.store';
 import {
+  Logger,
   SchedulerState,
   Store,
   Task,
@@ -25,6 +27,9 @@ export class TaskScheduler {
   // Holds onto the current scheduling conditions, such as version or date conditions
   private readonly conditionState: Map<string, any> = new Map();
 
+  // Logger implementation
+  private logger: Logger = new ConsoleLogger();
+
   // Hold onto scheduler state
   private state: SchedulerState = `planning`;
   private runner: TaskRunner | null = null;
@@ -40,11 +45,32 @@ export class TaskScheduler {
     return this.store;
   }
 
+  /**
+   * Overrides the default logger
+   * The default logger is a simple wrapper around the console
+   * @param logger The logger to use
+   */
+  setLogger(logger: Logger) {
+    this.logger = logger;
+
+    const getChildLogger = (name: string) => {
+      return this.logger.child?.(name) ?? this.logger;
+    };
+
+    this.dependencyResolver.logger = getChildLogger(DependencyResolver.name);
+    this.store.logger = getChildLogger(this.store.constructor.name);
+  }
+
   addCondition(name: string, condition: any) {
     if (this.state !== `planning`) {
-      throw new Error(`Cannot add conditions after task execution starts!`);
+      const badStateError = new Error(
+        `Cannot add conditions after task execution starts!`,
+      );
+      this.logger.fatal(`Bad state! ${badStateError.message}`, badStateError);
+      throw badStateError;
     }
     this.conditionState.set(name, condition);
+    this.logger.debug(`Setting condition ${name}: ${condition}`);
     return this;
   }
 
@@ -61,21 +87,31 @@ export class TaskScheduler {
    */
   registerTask(task: Task): TaskScheduler {
     if (this.state !== `planning`) {
-      throw new Error(`Cannot register tasks after task execution starts!`);
+      const badStateError = new Error(
+        `Cannot register tasks after task execution starts!`,
+      );
+      this.logger.fatal(`Bad state! ${badStateError.message}`);
+      throw badStateError;
     }
 
     if (
       this.taskRegistry.has(task.name) &&
       task != this.taskRegistry.get(task.name)
     ) {
-      throw new Error(
+      const alreadyExistsError = new Error(
         `Task ${task.name} was already registered! This could cause a discrepancy, only register tasks once.`,
       );
+      this.logger.fatal(alreadyExistsError.message, alreadyExistsError);
+      throw alreadyExistsError;
     }
     if (task.dependsOn) {
       this.dependencyResolver.addDependencies(task.name, task.dependsOn);
+      this.logger.debug(
+        `Registered task ${task.name} and its ${task.dependsOn.length} dependencies`,
+      );
     } else {
       this.dependencyResolver.addTask(task.name);
+      this.logger.debug(`Registered task ${task.name} with no dependencies`);
     }
     this.taskRegistry.set(task.name, task);
     return this;
@@ -99,11 +135,15 @@ export class TaskScheduler {
    */
   registerStore(store: Store) {
     this.store = store;
+    store.logger = this.logger.child?.(store.constructor.name) ?? this.logger;
     return this;
   }
 
   async lookupMissingConditionsInStore(tasks: Task[]) {
     if (!this.shouldLookupConditionsInStore) {
+      this.logger.debug(
+        `Scheduler not looking up conditions in store due to shouldLookupConditionsInStore set to false`,
+      );
       return;
     }
 
@@ -114,6 +154,9 @@ export class TaskScheduler {
       for (const name of conditionNames) {
         if (!this.conditionState.has(name) && this.store.has(name)) {
           const conditionState = await this.store.get(name);
+          this.logger.debug(
+            `Found condition ${name} in store, setting value to ${conditionState}`,
+          );
           this.addCondition(name, conditionState);
         }
       }
@@ -132,9 +175,11 @@ export class TaskScheduler {
     } else if (condition.compareFromState) {
       return condition.compareFromState(this.conditionState);
     } else {
-      throw new Error(
+      const invalidStateError = new Error(
         `Cannot resolve condition: ${condition.name} for task ${task.name}, is the state available?`,
       );
+      this.logger.fatal(invalidStateError.message, invalidStateError);
+      throw invalidStateError;
     }
   }
 
@@ -154,15 +199,33 @@ export class TaskScheduler {
       if (!this.conditionsApplyTo(task)) {
         task.state = `skipped`;
         task.skippedReason = `Does not meet conditions`;
+        this.logger.debug(
+          `Task ${task.name} skipped due to not meeting conditions.`,
+        );
       }
       if (task.state !== `idle` && task.state !== `skipped`) {
-        throw new Error(
+        const invalidStateError = new Error(
           `Task in invalid state before running! ${task.name} in state ${task.state}`,
         );
+        this.logger.fatal(invalidStateError.message, invalidStateError);
+        throw invalidStateError;
       }
     });
 
     const sortedTasks = orderedTasks.filter((task) => task.state === `idle`);
+
+    // Setup task modifier loggers
+    sortedTasks.forEach((task) => {
+      task.modifiers.forEach((modifier, index) => {
+        if (!modifier.logger) {
+          let className = modifier.constructor.name;
+          if (className === `Object`) {
+            className = `Modifier:${index}`;
+          }
+          modifier.logger = this.logger.child?.(`${task.name}:${className}`);
+        }
+      });
+    });
     return sortedTasks;
   }
 
@@ -171,12 +234,17 @@ export class TaskScheduler {
    */
   async run() {
     if (this.state !== `planning`) {
-      throw new Error(`Cannot run tasks in already running state!`);
+      const badStateError = new Error(
+        `Cannot run tasks in already running state!`,
+      );
+      this.logger.fatal(`Bad state! ${badStateError.message}`, badStateError);
+      throw badStateError;
     }
     const toRun = await this.resolveTasksToRun();
 
-    console.log(
-      `Running tasks, found ordering: ${JSON.stringify(toRun.map((run) => run.name))}`,
+    this.logger.info(`Running tasks: found ${toRun.length} task(s) to run`);
+    this.logger.debug(
+      `Task order: ${JSON.stringify(toRun.map((run) => run.name))}`,
     );
     this.state = `running`;
 
@@ -184,18 +252,22 @@ export class TaskScheduler {
     const runner = this.taskRunnerProvider.getTaskRunner(
       toRun,
       this.conditionState,
+      this.logger,
       this.getStore(),
     );
     runner.on(`done`, () => {
-      console.log(`Done running ${toRun.length} task(s)`);
+      this.logger.info(`Done running ${toRun.length} task(s)`);
       this.state = `finished`;
     });
-    runner.on(`error`, () => {
-      console.error(`Scheduler failed, error thrown when running tasks!`);
+    runner.on(`error`, (error) => {
+      this.logger.error(
+        `Scheduler failed, error thrown when running tasks!`,
+        error,
+      );
       this.state = `error`;
     });
     runner.on(`taskComplete`, (task) => {
-      console.log(`Task ${task.name} complete with status ${task.state}`);
+      this.logger.debug(`Task ${task.name} complete with status ${task.state}`);
     });
     this.runner = runner;
     await runner.start(process.argv);

@@ -1,4 +1,4 @@
-import { Store, Task, TaskRunner, TaskRunnerEventMap } from '../types';
+import { Logger, Store, Task, TaskRunner, TaskRunnerEventMap } from '../types';
 import { EventEmitter } from 'events';
 import { setTimeout } from 'timers/promises';
 import {
@@ -7,6 +7,7 @@ import {
   shouldRunTask,
 } from './taskRunner.utils';
 import AsyncLock from 'async-lock';
+import { ConsoleLogger } from '../logger/console.logger';
 
 export class ParallelTaskRunner
   extends EventEmitter<TaskRunnerEventMap>
@@ -19,6 +20,8 @@ export class ParallelTaskRunner
 
   private workers: Promise<string>[] = [];
 
+  logger: Logger = new ConsoleLogger();
+
   private readonly taskLock = `task_lock`;
   constructor(
     private readonly tasks: Task[],
@@ -26,9 +29,12 @@ export class ParallelTaskRunner
     private readonly store: Store,
     private readonly parallelCount: number = 4,
     private readonly processorTick: number = 100,
+    logger: Logger,
   ) {
     super();
+    this.logger = logger;
 
+    this.logger.debug(`Creating ${this.parallelCount} processing queues`);
     for (let i = 0; i < this.parallelCount; i++) {
       this.workers.push(this.createTaskProcessor(`Processor ${i + 1}`));
     }
@@ -36,6 +42,7 @@ export class ParallelTaskRunner
 
   async start(args: string[]) {
     this.args = args;
+    this.logger.trace(`Starting task runner`);
 
     await Promise.allSettled(this.workers);
     this.emit(`done`, this.completedTasks);
@@ -50,6 +57,7 @@ export class ParallelTaskRunner
             try {
               const task = await this.getNextTask();
               if (task) {
+                this.logger.trace(`Calling willRunTask for ${task.name}`);
                 await notifyWillRunTask({
                   task,
                   conditionState: this.conditionState,
@@ -68,9 +76,15 @@ export class ParallelTaskRunner
 
         if (resolvedTask) {
           try {
-            console.log(`${name}: Processing task ${resolvedTask.name}`);
+            this.logger.debug(
+              `Task processing on queue ${name}: ${resolvedTask.name}`,
+            );
             await resolvedTask.run(this.args);
             resolvedTask.state = `success`;
+            this.logger.debug(
+              `Task finished successfully on queue ${name}: ${resolvedTask.name}`,
+            );
+            this.logger.trace(`Calling didRunTask for ${resolvedTask.name}`);
             await notifyDidRunTask({
               task: resolvedTask,
               conditionState: this.conditionState,
@@ -80,6 +94,10 @@ export class ParallelTaskRunner
             this.emit(`taskComplete`, resolvedTask);
           } catch (error) {
             resolvedTask.state = `error`;
+            this.logger.debug(
+              `Task threw on queue ${name}: ${resolvedTask.name}`,
+            );
+            this.logger.trace(`Calling didRunTask for ${resolvedTask.name}`);
             await notifyDidRunTask({
               task: resolvedTask,
               conditionState: this.conditionState,
@@ -88,10 +106,14 @@ export class ParallelTaskRunner
             this.emit(`error`, error);
           }
         } else {
+          this.logger.debug(
+            `Queue ${name} found no tasks, will re-try in ${this.processorTick}ms`,
+          );
           await setTimeout(this.processorTick);
         }
       }
 
+      this.logger.debug(`Queue ${name} finished processing.`);
       return `done`;
     };
 
@@ -111,13 +133,23 @@ export class ParallelTaskRunner
         if (dep.state === `error`) {
           task.state = `error`;
           allDepsDone = false;
+          this.logger.info(
+            `Task ${task.name} not running due to failed dependencies:`,
+            dependencies
+              .filter((_dep) => _dep.state === `error`)
+              .map((_dep) => _dep.name),
+          );
           break;
         } else if (dep.state === `idle` || dep.state === `running`) {
           allDepsDone = false;
+          this.logger.debug(
+            `Task ${task.name} not ready due to pending dependency ${dep.name}`,
+          );
         }
       }
 
       if (allDepsDone) {
+        this.logger.trace(`Calling shouldRunTask for ${task.name}`);
         const shouldRun = await shouldRunTask({
           task,
           conditionState: this.conditionState,
@@ -126,6 +158,7 @@ export class ParallelTaskRunner
         if (!shouldRun) {
           task.state = `skipped`;
           task.skippedReason = `Due to modifiers`;
+          this.logger.info(`Task ${task.name} skipped due to modifiers`);
         } else {
           return task;
         }

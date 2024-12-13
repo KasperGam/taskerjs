@@ -92,6 +92,7 @@ export interface Condition<C, V = C> {
  * to store condition state
  */
 export interface Store {
+  logger?: Logger;
   /**
    * Returns true if the store contains the given key, false otherwise
    * @param key The key to test if the store contains
@@ -144,6 +145,7 @@ export type ModifierArgs<T extends Task = Task> = {
  * with args.task.state.
  */
 export interface Modifier<T extends Task = Task> {
+  logger?: Logger;
   /**
    * Called before any other modifier callback to determine if the task
    * should be run. Allows the modifier to mark the task as skipped if
@@ -221,6 +223,24 @@ export interface TaskRunnerProvider {
   getTaskRunner: (
     tasks: Task[],
     state: Map<string, any>,
+    logger: Logger,
     store?: Store,
   ) => TaskRunner;
+}
+
+type LogMethod = (...args: any[]) => void;
+
+/**
+ * Defines interface for a logger like pino or winston to implement
+ */
+export interface Logger {
+  fatal: LogMethod;
+  error: LogMethod;
+  warn: LogMethod;
+  info: LogMethod;
+  log?: LogMethod;
+  debug: LogMethod;
+  trace: LogMethod;
+
+  child?: (name?: string) => Logger;
 }
