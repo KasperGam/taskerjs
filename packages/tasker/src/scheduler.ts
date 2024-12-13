@@ -1,10 +1,12 @@
 import { ConsoleLogger } from './logger/console.logger';
 import { DependencyResolver } from './resolver/dependency.resolver';
+import { ParallelTaskRunnerProvider } from './runner';
 import { SyncTaskRunnerProvider } from './runner/sync.taskRunnerProvider';
 import { InMemoryStore } from './store/memory.store';
 import {
   Logger,
   SchedulerState,
+  SchedulerTaskRunnerType,
   Store,
   Task,
   TaskRunner,
@@ -35,6 +37,9 @@ export class TaskScheduler {
   private runner: TaskRunner | null = null;
   private store: Store = new InMemoryStore();
 
+  // Which runner to use- as a helper
+  private runnerType: SchedulerTaskRunnerType = `serial`;
+
   public shouldLookupConditionsInStore: boolean = false;
 
   getState(): SchedulerState {
@@ -59,6 +64,8 @@ export class TaskScheduler {
 
     this.dependencyResolver.logger = getChildLogger(DependencyResolver.name);
     this.store.logger = getChildLogger(this.store.constructor.name);
+
+    return this;
   }
 
   addCondition(name: string, condition: any) {
@@ -76,6 +83,43 @@ export class TaskScheduler {
 
   setShouldLookupConditionsInStore(should: boolean) {
     this.shouldLookupConditionsInStore = should;
+    return this;
+  }
+
+  setTaskRunnerType(
+    runnerType: `serial` | `parallel`,
+    options?: {
+      parallelCount?: number;
+      pollInterval?: number;
+    },
+  ) {
+    this.runnerType = runnerType;
+    this.logger.debug(`Set new task runner provider type ${runnerType}`);
+    switch (runnerType) {
+      case `serial`:
+        this.taskRunnerProvider = new SyncTaskRunnerProvider();
+        break;
+      case `parallel`:
+        const newProvider = new ParallelTaskRunnerProvider();
+        if (options?.parallelCount) {
+          newProvider.parallelCount = Math.max(
+            0,
+            Math.min(32, options.parallelCount),
+          );
+        }
+        if (options.pollInterval) {
+          newProvider.pollInterval = Math.max(
+            5,
+            Math.min(5000, options.pollInterval),
+          );
+        }
+        this.taskRunnerProvider = newProvider;
+        break;
+      default:
+        runnerType satisfies never;
+        return;
+    }
+
     return this;
   }
 
@@ -125,6 +169,7 @@ export class TaskScheduler {
    */
   registerTaskRunnerProvider(provider: TaskRunnerProvider) {
     this.taskRunnerProvider = provider;
+    this.runnerType = `custom`;
     return this;
   }
 

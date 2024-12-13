@@ -167,6 +167,14 @@ export interface Modifier<T extends Task = Task> {
 export type SchedulerState = `planning` | `running` | `error` | `finished`;
 
 /**
+ * The scheduler runner type
+ * - serial: Uses the sync task runner which runs tasks one at a time
+ * - parallel: Uses the parallel task runner which runs tasks in parallel
+ * - custom: A custom runner was registered using registerTaskRunnerProvider
+ */
+export type SchedulerTaskRunnerType = `serial` | `parallel` | `custom`;
+
+/**
  * Internal type for task runners to help type hints for the event emitter
  */
 export type TaskRunnerEventMap = {
