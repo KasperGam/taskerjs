@@ -60,6 +60,7 @@ describe(`Run Once Modifier`, () => {
     task.reset();
 
     const newScheduler = new TaskScheduler();
+    newScheduler.setLogger(new TestLogger());
     newScheduler.registerStore(store);
     newScheduler.registerTask(task);
     newScheduler.addCondition(`version`, `1.2.4`); // Different version/name- will run task again
@@ -74,6 +75,7 @@ describe(`Run Once Modifier`, () => {
     task.reset();
 
     const newScheduler2 = new TaskScheduler();
+    newScheduler2.setLogger(new TestLogger());
     newScheduler2.registerStore(store);
     newScheduler2.registerTask(task);
     newScheduler2.addCondition(`version`, `1.2.3`); // Same version and name, won't run task

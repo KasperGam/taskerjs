@@ -166,6 +166,7 @@ describe(`Task Scheduler`, () => {
     [taskA, taskB, taskC, taskD, taskE].forEach((task) => task.reset());
 
     const scheduler2 = new TaskScheduler();
+    scheduler2.setLogger(new TestLogger());
     scheduler2.registerTask(taskA);
     scheduler2.registerTask(taskB);
     scheduler2.registerTask(taskC);
