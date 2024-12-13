@@ -1,5 +1,5 @@
 import { DiscoveryService } from '@golevelup/nestjs-discovery';
-import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { Store, TaskScheduler } from '@optask/tasker';
 import { TaskMetaKey } from './constants';
 import { BaseTask, TaskMetadata } from './task.interface';

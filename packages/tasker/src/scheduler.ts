@@ -96,10 +96,11 @@ export class TaskScheduler {
     this.runnerType = runnerType;
     this.logger.debug(`Set new task runner provider type ${runnerType}`);
     switch (runnerType) {
-      case `serial`:
+      case `serial`: {
         this.taskRunnerProvider = new SyncTaskRunnerProvider();
         break;
-      case `parallel`:
+      }
+      case `parallel`: {
         const newProvider = new ParallelTaskRunnerProvider();
         if (options?.parallelCount) {
           newProvider.parallelCount = Math.max(
@@ -115,9 +116,11 @@ export class TaskScheduler {
         }
         this.taskRunnerProvider = newProvider;
         break;
-      default:
+      }
+      default: {
         runnerType satisfies never;
         return;
+      }
     }
 
     return this;
