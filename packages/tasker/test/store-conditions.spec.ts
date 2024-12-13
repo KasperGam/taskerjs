@@ -1,6 +1,7 @@
 import { EqualsCondition, ORCondition } from '../src/conditions';
 import { TaskScheduler } from '../src/scheduler';
 import { InMemoryStore } from '../src/store';
+import { TestLogger } from './test.logger';
 import { TestTask } from './test.task';
 
 describe(`Store Conditions`, () => {
@@ -8,6 +9,7 @@ describe(`Store Conditions`, () => {
 
   beforeEach(() => {
     scheduler = new TaskScheduler();
+    scheduler.setLogger(new TestLogger());
   });
 
   it(`Does not do lookup`, async () => {

@@ -1,12 +1,14 @@
 import { RunOnceModifier } from '../src/modifiers/run-once.modifier';
 import { TaskScheduler } from '../src/scheduler';
 import { InMemoryStore } from '../src/store/memory.store';
+import { TestLogger } from './test.logger';
 import { TestTask } from './test.task';
 
 describe(`Run Once Modifier`, () => {
   let scheduler: TaskScheduler;
   beforeEach(() => {
     scheduler = new TaskScheduler();
+    scheduler.setLogger(new TestLogger());
   });
 
   it(`Only runs task one time - no condition dependencies`, async () => {

@@ -8,6 +8,7 @@ import {
 } from '../src/conditions';
 import { GeneralCondition } from '../src/conditions/general.condition';
 import { TaskScheduler } from '../src/scheduler';
+import { TestLogger } from './test.logger';
 import { TestTask } from './test.task';
 
 describe(`Conditions`, () => {
@@ -16,6 +17,7 @@ describe(`Conditions`, () => {
 
   beforeEach(() => {
     scheduler = new TaskScheduler();
+    scheduler.setLogger(new TestLogger());
     task = new TestTask({ name: `test` });
   });
 

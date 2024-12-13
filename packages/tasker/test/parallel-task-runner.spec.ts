@@ -1,5 +1,6 @@
 import { ParallelTaskRunnerProvider } from '../src/runner/parallel.taskRunnerProvider';
 import { TaskScheduler } from '../src/scheduler';
+import { TestLogger } from './test.logger';
 import { TestTask } from './test.task';
 import { setTimeout } from 'timers/promises';
 
@@ -7,6 +8,7 @@ describe(`Parallel task runner`, () => {
   let scheduler: TaskScheduler;
   beforeEach(() => {
     scheduler = new TaskScheduler();
+    scheduler.setLogger(new TestLogger());
     scheduler.registerTaskRunnerProvider(new ParallelTaskRunnerProvider());
   });
 

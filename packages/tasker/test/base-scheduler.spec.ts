@@ -4,12 +4,14 @@ import { GreaterThanCondition } from '../src/conditions/greaterThan.condition';
 import { LessThanCondition } from '../src/conditions/lessThan.condition';
 import { ORCondition } from '../src/conditions/or.condition';
 import { TaskScheduler } from '../src/scheduler';
+import { TestLogger } from './test.logger';
 import { TestTask } from './test.task';
 
 describe(`Task Scheduler`, () => {
   let scheduler: TaskScheduler;
   beforeEach(() => {
     scheduler = new TaskScheduler();
+    scheduler.setLogger(new TestLogger());
   });
 
   it(`Runs tasks no dependencies`, async () => {
