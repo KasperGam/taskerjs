@@ -1,5 +1,7 @@
 export { TaskScheduler } from './src/scheduler';
 export { BaseTask } from './src/tasks/base.task';
+export { ExecutableTask } from './src/tasks/executable.task';
+export { TaskMixin } from './src/tasks/task.mixin';
 export * from './src/conditions';
 export * from './src/modifiers';
 export * from './src/store';
