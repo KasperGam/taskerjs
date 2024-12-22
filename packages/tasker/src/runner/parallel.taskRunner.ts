@@ -131,7 +131,7 @@ export class ParallelTaskRunner
       let allDepsDone = true;
       for (const dep of dependencies) {
         if (dep.state === `error`) {
-          task.state = `error`;
+          task.state = `skipped`;
           allDepsDone = false;
           this.logger.info(
             `Task ${task.name} not running due to failed dependencies:`,

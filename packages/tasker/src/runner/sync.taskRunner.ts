@@ -40,6 +40,15 @@ export class SyncTaskRunner
         store: this.store,
       };
       try {
+        const failedDeps = this.failedDependencies(task);
+        if (failedDeps.length > 0) {
+          task.state = `skipped`;
+          this.logger.info(
+            `Task ${task.name} not running due to failed dependencies:`,
+            failedDeps.map((dep) => dep.name),
+          );
+          continue;
+        }
         // Check if we should skip the task
         this.logger.trace(`Calling shouldRunTask for ${task.name}`);
         const shouldRun = await shouldRunTask(modifierArgs);
@@ -84,5 +93,13 @@ export class SyncTaskRunner
 
   getCompletedTasks() {
     return this.completedTasks;
+  }
+
+  private failedDependencies(task: Task) {
+    const dependencies = (task.dependsOn ?? [])
+      .map((dep) => this.tasks.find((_task) => _task.name === dep))
+      .filter((depTask) => !!depTask);
+
+    return dependencies.filter((dep) => dep.state === `error`);
   }
 }
